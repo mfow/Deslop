@@ -98,7 +98,7 @@ All three surfaces use the same analysis engine. The worst offenders come first
 so the report starts with the cleanup that matters most.
 
 Supported languages: C#, Rust, Python, Dart, JavaScript, TypeScript/TSX, PHP,
-F#, and Go.
+F#, Go, and OCaml.
 
 ## Connect a coding agent
 

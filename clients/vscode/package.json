@@ -34,7 +34,8 @@
     "tsx",
     "php",
     "fsharp",
-    "go"
+    "go",
+    "ocaml"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -51,6 +52,7 @@
     "onLanguage:fsharp",
     "onLanguage:php",
     "onLanguage:go",
+    "onLanguage:ocaml",
     "workspaceContains:**/*.cs",
     "workspaceContains:**/*.rs",
     "workspaceContains:**/*.py",
@@ -64,7 +66,8 @@
     "workspaceContains:**/*.php",
     "workspaceContains:**/*.fs",
     "workspaceContains:**/*.fsx",
-    "workspaceContains:**/*.go"
+    "workspaceContains:**/*.go",
+    "workspaceContains:**/*.ml"
   ],
   "contributes": {
     "commands": [

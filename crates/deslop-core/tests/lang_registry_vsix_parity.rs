@@ -117,6 +117,10 @@ fn vsix_on_language_events_exist_for_every_registered_language() -> Result<()> {
         on_language.contains("fsharp"),
         "F# must wake the extension in F# repos, got {on_language:?}"
     );
+    assert!(
+        on_language.contains("ocaml"),
+        "OCaml must wake the extension in OCaml repos, got {on_language:?}"
+    );
     Ok(())
 }
 

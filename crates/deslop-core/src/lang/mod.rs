@@ -27,6 +27,7 @@ pub mod fsharp;
 pub mod go;
 pub mod javascript;
 mod merge_emit;
+pub mod ocaml;
 pub mod php;
 pub mod python;
 pub mod rust_lang;

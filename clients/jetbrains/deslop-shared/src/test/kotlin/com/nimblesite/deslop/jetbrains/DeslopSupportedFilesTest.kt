@@ -22,7 +22,7 @@ internal class DeslopSupportedFilesTest {
     @Test
     fun everyShippingLanguageExtensionIsAnalysed() {
         val extensions =
-            listOf("cs", "rs", "py", "dart", "js", "mjs", "cjs", "jsx", "ts", "tsx", "php", "fs", "fsx", "go")
+            listOf("cs", "rs", "py", "dart", "js", "mjs", "cjs", "jsx", "ts", "tsx", "php", "fs", "fsx", "go", "ml")
         for (extension in extensions) {
             assertTrue(
                 DeslopSupportedFiles.supportsExtension(extension),

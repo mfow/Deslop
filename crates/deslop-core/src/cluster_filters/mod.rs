@@ -123,7 +123,7 @@ mod declaration_family;
 mod ecmascript;
 mod family;
 mod forwarding;
-mod fsharp_scaffolding;
+mod ml_scaffolding;
 mod node_search;
 mod override_marker;
 mod polymorphic;
@@ -343,7 +343,12 @@ fn language_specific_noise(
         "dart" => (dart::is_dart_class_field_declaration_cluster(snippets, cache)
             || dart::is_dart_widget_scaffold_cluster(snippets))
         .then_some(generic),
-        "fsharp" => fsharp_scaffolding::is_import_scaffolding_cluster(snippets).then_some(generic),
+        "fsharp" => {
+            ml_scaffolding::is_import_scaffolding_cluster(snippets, &ml_scaffolding::FSHARP)
+                .then_some(generic)
+        }
+        "ocaml" => ml_scaffolding::is_import_scaffolding_cluster(snippets, &ml_scaffolding::OCAML)
+            .then_some(generic),
         "python" => python_noise(snippets),
         "rust" => rust_noise(snippets).then_some(generic),
         "javascript" | "typescript" | "tsx" => {
@@ -620,6 +625,11 @@ pub(super) const fn function_kinds(language: &str) -> &'static [&'static str] {
         // the signature-only and polymorphic-signature filters
         // can compare bodies after a signature-only structural match.
         b"go" => &["function_declaration", "method_declaration", "func_literal"],
+        // OCaml `let` bindings, anonymous `fun`s and class methods all
+        // expose a `body` field so the signature-only and
+        // polymorphic-signature filters can compare bodies after a
+        // signature-only structural match — parity with F#.
+        b"ocaml" => &["let_binding", "fun_expression", "method_definition"],
         _ => &[],
     }
 }

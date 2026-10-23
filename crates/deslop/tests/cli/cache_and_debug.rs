@@ -733,6 +733,18 @@ fn debug_ast_dump_matches_committed_golden_fsharp() -> Result<()> {
     assert_ast_golden("ast-golden-fsharp", "Sample.fs")
 }
 
+// [PARSE-OCAML-NORMALIZE] golden: Sample.ml exercises name collapse
+// (`value_name`, `value_pattern`, `module_name` under `open`,
+// `constructor_name`), literal collapse (string, float, bool, char, hex
+// number, unit, quoted string, and a format string), block and doc
+// comment drop, and operator leaves for `&&`, `>=`, `*.` and the `-.`
+// sign operator. Any grammar bump or `normalise_kind` edit trips this
+// byte-for-byte check.
+#[test]
+fn debug_ast_dump_matches_committed_golden_ocaml() -> Result<()> {
+    assert_ast_golden("ast-golden-ocaml", "Sample.ml")
+}
+
 // [LANG-CAND-GO] golden: Sample.go exercises identifier collapse
 // (`identifier`, `field_identifier`, `type_identifier`,
 // `package_identifier` in a qualified type, `blank_identifier`, and

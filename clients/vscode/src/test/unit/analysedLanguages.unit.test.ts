@@ -38,8 +38,8 @@ function activationSuffixes(prefix: string): string[] {
     .sort();
 }
 
-suite("analysed language registry covers F#, PHP and Go", () => {
-  test("F#, PHP and Go editor ids are analysed (hover + inlay attach)", () => {
+suite("analysed language registry covers F#, PHP, Go and OCaml", () => {
+  test("F#, PHP, Go and OCaml editor ids are analysed (hover + inlay attach)", () => {
     assert.ok(
       ANALYSED_LANGUAGE_IDS.includes("fsharp"),
       "fsharp must be an analysed language or the F# hover card never registers",
@@ -53,20 +53,27 @@ suite("analysed language registry covers F#, PHP and Go", () => {
       "go must be an analysed language or the LSP never syncs .go buffers, " +
         "which kills the live loop, the hover card and the inlay bubble for Go",
     );
+    assert.ok(
+      ANALYSED_LANGUAGE_IDS.includes("ocaml"),
+      "ocaml must be an analysed language or the LSP never syncs .ml buffers",
+    );
   });
 
-  test("F#, PHP and Go source extensions resolve to their language id", () => {
+  test("F#, PHP, Go and OCaml source extensions resolve to their language id", () => {
     assert.equal(languageForPath("/repo/Tests.fs"), "fsharp");
     assert.equal(languageForPath("/repo/Script.fsx"), "fsharp");
     assert.equal(languageForPath("/repo/Model.php"), "php");
     assert.equal(languageForPath("/repo/cmd/server/main.go"), "go");
     assert.equal(languageForPath("/repo/cmd/server/MAIN.GO"), "go");
+    assert.equal(languageForPath("/repo/lib/parser.ml"), "ocaml");
+    assert.equal(languageForPath("/repo/lib/parser.mli"), "unknown");
   });
 
-  test("F#, PHP and Go carry human display names", () => {
+  test("F#, PHP, Go and OCaml carry human display names", () => {
     assert.equal(languageDisplayName("fsharp"), "F#");
     assert.equal(languageDisplayName("php"), "PHP");
     assert.equal(languageDisplayName("go"), "Go");
+    assert.equal(languageDisplayName("ocaml"), "OCaml");
   });
 
   test("Go is offered as a filter option in the report webview", () => {

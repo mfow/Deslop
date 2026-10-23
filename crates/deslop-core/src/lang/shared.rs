@@ -354,8 +354,8 @@ fn retained_span(children: &[NormalizedNode]) -> Option<ByteRange> {
 /// them ([PIPELINE-NORMALIZE-AST-OPERATOR]).
 ///
 /// Some grammars name an operator node by something other than its token:
-/// `tree-sitter-fsharp` calls every infix operator `infix_op` and every
-/// prefix operator `prefix_op`, whatever the token. Passed
+/// `tree-sitter-fsharp` calls every infix operator `infix_op`, and
+/// `tree-sitter-ocaml` calls both `+` and `-` `add_operator`. Passed
 /// through as a structural kind, `alpha + beta` and `alpha - beta`
 /// normalised to the same subtree. Each such node becomes one operator
 /// leaf labelled by its own source text, exactly as a fielded anonymous

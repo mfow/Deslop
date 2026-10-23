@@ -340,6 +340,7 @@ fn language_display_name(language: &str) -> &'static str {
         "tsx" => "TSX",
         "fsharp" => "F#",
         "go" => "Go",
+        "ocaml" => "OCaml",
         _ => "Other",
     }
 }
