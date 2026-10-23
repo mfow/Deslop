@@ -14,6 +14,12 @@ pub(crate) mod negative_pin;
 
 pub(crate) mod signals;
 
+/// The per-language operator-drift contract
+/// ([PIPELINE-NORMALIZE-AST-OPERATOR]). Imported explicitly with
+/// `use crate::common::operator_drift::*;`, for the same reason as
+/// `signals`.
+pub(crate) mod operator_drift;
+
 pub(crate) mod findings;
 pub(crate) use findings::clone_findings;
 

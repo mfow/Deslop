@@ -1,0 +1,7 @@
+module ComparisonLess
+
+let compareBounds alpha beta gamma delta =
+    let first = alpha < beta
+    let second = gamma < delta
+    let third = first < second
+    third < (alpha < delta)
