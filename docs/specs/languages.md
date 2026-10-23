@@ -32,9 +32,9 @@ Kotlin is not a supported parser in [PIPELINE-LANG-TRAIT]. A live `find_similar`
 
 ## [PARSE-FSHARP-NORMALIZE] F# normalization
 
-`.fs` and `.fsx` use the F# source grammar. Identifier and operator-identifier leaves collapse to `__ident__`; numeric, character, boolean, unit, and string literals collapse to `__literal__`. Line comments, block comments, and XML documentation disappear. Qualified names, interpolation expressions, active patterns, computation expressions, pipelines, units of measure, and quotations retain their structure.
+`.fs` and `.fsx` use the F# source grammar. Identifier and operator-identifier leaves collapse to `__ident__`; numeric, character, boolean, unit, and string literals collapse to `__literal__`. Line comments, block comments, and XML documentation disappear. The grammar spells every infix and prefix operator as a named `infix_op` / `prefix_op` node, so each becomes one operator leaf carrying its own token (`__op__+`, `__op__|>`) under [PIPELINE-NORMALIZE-AST-OPERATOR]; `alpha + beta` and `alpha - beta` never hash alike. Qualified names, interpolation expressions, active patterns, computation expressions, pipelines, units of measure, and quotations retain their structure.
 
-Implemented by `crates/deslop-core/src/lang/fsharp.rs`; the F# AST golden in `crates/deslop/tests/cli/cache_and_debug.rs` pins normalized output.
+Implemented by `crates/deslop-core/src/lang/fsharp.rs`; the F# AST golden in `crates/deslop/tests/cli/cache_and_debug.rs` pins normalized output; `lang/fsharp_tests.rs` and `crates/deslop/tests/operator_drift_fsharp.rs` pin the operator leaves.
 
 ## [PARSE-PHP-NORMALIZE] PHP normalization
 

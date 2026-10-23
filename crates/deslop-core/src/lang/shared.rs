@@ -274,12 +274,19 @@ pub fn parse_source(
 /// overflowing the pipeline's recursive walks.
 pub fn build_normalised_root(
     tree: &Tree,
+    source: &[u8],
     file_id: FileId,
     normalise_kind: fn(&str) -> Option<&'static str>,
     language: &'static str,
 ) -> Result<NormalizedNode, CoreError> {
     let root = tree.root_node();
-    let children = normalise_children(root, FILE_KIND, file_id, normalise_kind, language, 1)?;
+    let walk = Walk {
+        source,
+        file_id,
+        normalise_kind,
+        language,
+    };
+    let children = normalise_children(&walk, root, FILE_KIND, 1)?;
     Ok(NormalizedNode {
         kind: FILE_KIND,
         byte_range: retained_span(&children).unwrap_or(ByteRange {
@@ -312,6 +319,20 @@ fn retained_span(children: &[NormalizedNode]) -> Option<ByteRange> {
     Some(ByteRange { start, end })
 }
 
+/// What every node of one file's walk shares: the source the tree was
+/// parsed from, the file the nodes belong to, and the grammar's rules.
+struct Walk<'source> {
+    /// The bytes the tree was parsed from. A named operator node is
+    /// labelled by its own text ([`NAMED_OPERATOR_PRODUCTIONS`]).
+    source: &'source [u8],
+    /// File every normalised node is attributed to.
+    file_id: FileId,
+    /// The grammar's per-kind collapse rule.
+    normalise_kind: fn(&str) -> Option<&'static str>,
+    /// Language id the grammar parses under.
+    language: &'static str,
+}
+
 /// Recursively normalises one tree-sitter [`Node`] at nesting `depth`.
 /// Returns `Ok(None)` when `normalise_kind` drops the node (trivia /
 /// comments / per-language noise) and [`CoreError::AstTooDeep`] when
@@ -319,22 +340,24 @@ fn retained_span(children: &[NormalizedNode]) -> Option<ByteRange> {
 /// downstream recursive walk by rejecting the file at its single
 /// construction chokepoint.
 fn normalise_node(
+    walk: &Walk<'_>,
     node: Node<'_>,
-    file_id: FileId,
-    normalise_kind: fn(&str) -> Option<&'static str>,
-    language: &'static str,
     depth: usize,
 ) -> Result<Option<NormalizedNode>, CoreError> {
     if depth > MAX_AST_DEPTH {
         return Err(CoreError::AstTooDeep {
-            language,
+            language: walk.language,
             limit: MAX_AST_DEPTH,
         });
     }
-    let Some(kind) = normalise_kind(node.kind()) else {
+    if is_named_operator(walk.language, node.kind()) {
+        return Ok(Some(named_operator_leaf(walk, node)));
+    }
+    let Some(kind) = (walk.normalise_kind)(node.kind()) else {
         return Ok(None);
     };
-    let children = normalise_children(node, kind, file_id, normalise_kind, language, depth)?;
+    let file_id = walk.file_id;
+    let children = normalise_children(walk, node, kind, depth)?;
     Ok(Some(NormalizedNode {
         kind,
         children,
@@ -371,26 +394,18 @@ fn normalise_node(
 /// still detect the change, but it would stop aligning positionally
 /// with a member whose operand count differs.
 fn normalise_children(
+    walk: &Walk<'_>,
     node: Node<'_>,
     parent_kind: &'static str,
-    file_id: FileId,
-    normalise_kind: fn(&str) -> Option<&'static str>,
-    language: &'static str,
     depth: usize,
 ) -> Result<Vec<NormalizedNode>, CoreError> {
     let mut children = Vec::new();
     let mut cursor = node.walk();
     for (index, child) in node.children(&mut cursor).enumerate() {
         let normalised = if child.is_named() {
-            normalise_node(
-                child,
-                file_id,
-                normalise_kind,
-                language,
-                depth.saturating_add(1),
-            )?
+            normalise_node(walk, child, depth.saturating_add(1))?
         } else {
-            operator_field_leaf(node, parent_kind, child, index, file_id, language)
+            operator_field_leaf(node, parent_kind, child, index, walk.file_id, walk.language)
         };
         if let Some(child_node) = normalised {
             children.push(child_node);
@@ -547,6 +562,43 @@ const UNFIELDED_OPERATOR_PRODUCTIONS: &[(&str, &str)] = &[
     ("dart", "postfix_expression"),
     ("dart", "negate_operator"),
 ];
+
+/// Named nodes that *are* an operator, keyed by the grammar that names
+/// them ([PIPELINE-NORMALIZE-AST-OPERATOR]).
+///
+/// Some grammars spell an operator as a named node rather than an
+/// anonymous token: `tree-sitter-fsharp` parses every infix operator as
+/// `infix_op` and every prefix operator as `prefix_op`, whatever the
+/// token. Passed through as a structural kind, `alpha + beta` and
+/// `alpha - beta` normalised to the same subtree. Such a node becomes one
+/// operator leaf labelled by its own source text, exactly as a fielded
+/// anonymous token is labelled by its spelling. The production decides
+/// the role; the text is only the label. Keyed by language for the same
+/// reason as [`UNFIELDED_OPERATOR_PRODUCTIONS`].
+const NAMED_OPERATOR_PRODUCTIONS: &[(&str, &str)] =
+    &[("fsharp", "infix_op"), ("fsharp", "prefix_op")];
+
+/// True when `kind` names a whole operator in `language`'s grammar.
+fn is_named_operator(language: &str, kind: &str) -> bool {
+    NAMED_OPERATOR_PRODUCTIONS
+        .iter()
+        .any(|(keyed_language, production)| *keyed_language == language && *production == kind)
+}
+
+/// The operator leaf for a named operator node, labelled by its source
+/// text. Its children are the token it already names, so none survive.
+fn named_operator_leaf(walk: &Walk<'_>, node: Node<'_>) -> NormalizedNode {
+    let token = walk.source.get(node.byte_range()).unwrap_or_default();
+    NormalizedNode {
+        kind: operator_kind_for_field(&String::from_utf8_lossy(token)),
+        children: Vec::new(),
+        byte_range: ByteRange {
+            start: node.start_byte(),
+            end: node.end_byte(),
+        },
+        file_id: walk.file_id,
+    }
+}
 
 /// True when `language`'s grammar left this production's operator
 /// unfielded, so the anonymous token in it is behaviour rather than

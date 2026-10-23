@@ -180,6 +180,8 @@ mod metrics_weighted_wire_refusal;
 mod minified_artifact_exclusion;
 #[path = "ollama_failures.rs"]
 mod ollama_failures;
+#[path = "operator_drift_fsharp.rs"]
+mod operator_drift_fsharp;
 #[path = "operator_drift_is_not_duplication.rs"]
 mod operator_drift_is_not_duplication;
 #[path = "pair_consistent_signals.rs"]

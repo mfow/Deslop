@@ -24,6 +24,9 @@
 //!   a constant `__literal__` subtree (parity with the Dart string
 //!   treatment in [`super::dart`]).
 //! - `line_comment`, `block_comment`, and `xml_doc` are dropped as trivia.
+//! - The grammar spells operators as named `infix_op` / `prefix_op`
+//!   nodes, which the shared walk turns into operator leaves carrying
+//!   their own token ([PIPELINE-NORMALIZE-AST-OPERATOR]).
 //! - All other named node kinds pass through unchanged.
 //!
 //! The F# idioms the normaliser deliberately keeps structural — active
@@ -83,7 +86,7 @@ impl LanguageParser for FSharpParser {
         file_id: FileId,
     ) -> Result<NormalizedNode, CoreError> {
         let tree = parse_source(LANGUAGE_ID, &self.grammar(), source)?;
-        build_normalised_root(&tree, file_id, normalise_kind, LANGUAGE_ID)
+        build_normalised_root(&tree, source, file_id, normalise_kind, LANGUAGE_ID)
     }
 }
 
@@ -122,3 +125,7 @@ fn is_literal_kind(raw: &str) -> bool {
             | "verbatim_string"
     )
 }
+
+#[cfg(test)]
+#[path = "fsharp_tests.rs"]
+mod tests;

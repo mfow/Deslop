@@ -25,7 +25,7 @@ pub(crate) fn parse_and_normalise(
     file_id: FileId,
 ) -> Result<NormalizedNode, CoreError> {
     let tree = parse_source(language_id, grammar, source)?;
-    build_normalised_root(&tree, file_id, normalise_kind, language_id)
+    build_normalised_root(&tree, source, file_id, normalise_kind, language_id)
 }
 
 /// Maps a JavaScript / TypeScript tree-sitter node kind to its

@@ -74,7 +74,7 @@ impl LanguageParser for RustParser {
         file_id: FileId,
     ) -> Result<NormalizedNode, CoreError> {
         let tree = parse_source(LANGUAGE_ID, &self.grammar(), source)?;
-        build_normalised_root(&tree, file_id, normalise_kind, LANGUAGE_ID)
+        build_normalised_root(&tree, source, file_id, normalise_kind, LANGUAGE_ID)
     }
 
     fn binding_node_kinds(&self) -> &'static [BindingKind] {
