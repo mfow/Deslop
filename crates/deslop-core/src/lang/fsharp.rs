@@ -24,6 +24,9 @@
 //!   a constant `__literal__` subtree (parity with the Dart string
 //!   treatment in [`super::dart`]).
 //! - `line_comment`, `block_comment`, and `xml_doc` are dropped as trivia.
+//! - The grammar spells operators as named `infix_op` / `prefix_op`
+//!   nodes, which the shared walk turns into operator leaves carrying
+//!   their own token ([PIPELINE-NORMALIZE-AST-OPERATOR]).
 //! - All other named node kinds pass through unchanged.
 //!
 //! The F# idioms the normaliser deliberately keeps structural — active
@@ -39,7 +42,10 @@ use crate::{
     ast::NormalizedNode,
     error::CoreError,
     lang::{
-        shared::{build_normalised_root, normalise_kind_with, parse_source},
+        shared::{
+            build_normalised_root_with_named_operators, normalise_kind_with, parse_source,
+            NamedOperators,
+        },
         LanguageParser,
     },
     state::FileId,
@@ -83,9 +89,24 @@ impl LanguageParser for FSharpParser {
         file_id: FileId,
     ) -> Result<NormalizedNode, CoreError> {
         let tree = parse_source(LANGUAGE_ID, &self.grammar(), source)?;
-        build_normalised_root(&tree, file_id, normalise_kind, LANGUAGE_ID)
+        let named_operators = NamedOperators {
+            source,
+            kinds: NAMED_OPERATOR_KINDS,
+        };
+        build_normalised_root_with_named_operators(
+            &tree,
+            named_operators,
+            file_id,
+            normalise_kind,
+            LANGUAGE_ID,
+        )
     }
 }
+
+/// F# operator nodes: the grammar parses every infix operator as
+/// `infix_op` and every prefix operator as `prefix_op`, whatever the token
+/// ([PIPELINE-NORMALIZE-AST-OPERATOR]).
+const NAMED_OPERATOR_KINDS: &[&str] = &["infix_op", "prefix_op"];
 
 /// Maps a tree-sitter F# node kind to its normalised form. Covers the
 /// identifier / literal / trivia families emitted by `tree-sitter-fsharp`
@@ -122,3 +143,7 @@ fn is_literal_kind(raw: &str) -> bool {
             | "verbatim_string"
     )
 }
+
+#[cfg(test)]
+#[path = "fsharp_tests.rs"]
+mod tests;
