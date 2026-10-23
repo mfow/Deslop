@@ -36,6 +36,12 @@ Kotlin is not a supported parser in [PIPELINE-LANG-TRAIT]. A live `find_similar`
 
 Implemented by `crates/deslop-core/src/lang/fsharp.rs`; the F# AST golden in `crates/deslop/tests/cli/cache_and_debug.rs` pins normalized output; `lang/fsharp_tests.rs` and `crates/deslop/tests/operator_drift_fsharp.rs` pin the operator leaves.
 
+## [PARSE-OCAML-NORMALIZE] OCaml normalization
+
+`.ml` files use the OCaml implementation grammar. Interface files (`.mli`) are not analysed, just as F# signature files are not: they declare types and nothing else, so every pair would match on scaffolding alone. Every name collapses to `__ident__`: values, record fields, labels, modules, types and type variables, classes and methods, constructors, and polymorphic-variant tags. Numbers, booleans, characters, unit, every string form (including `{|quoted|}` strings) and printf conversions collapse to `__literal__`; comments and doc comments disappear. The grammar names each operator by its precedence class (`add_operator` covers both `+` and `-`; `rel_operator` covers `|>` and `>>=`), so each becomes one operator leaf carrying its own token under [PIPELINE-NORMALIZE-AST-OPERATOR], including `!`, `:=`, `-.` and binding operators such as `let*`. Paths such as `List.length`, pattern matches, records and modules keep their structure. Files that only share `open` lines are hidden by [CLONE-NOISE-ML-IMPORTS].
+
+Implemented by `crates/deslop-core/src/lang/ocaml.rs`; unit-tested by `lang/ocaml_tests.rs`; exercised by the OCaml AST golden and the OCaml detection cases in `crates/deslop/tests/cli/`, `crates/deslop/tests/operator_drift_ocaml.rs`, `import_scaffolding.rs` and `ocaml_literal_bindings.rs`.
+
 ## [PARSE-PHP-NORMALIZE] PHP normalization
 
 `.php` files use the PHP grammar. Name leaves collapse to `__ident__`, including the name inside a variable. Numeric, boolean, null, and string-family nodes collapse to `__literal__`; their children still undergo normalization. Comments and documentation comments disappear; remaining named nodes retain their structure.

@@ -23,6 +23,16 @@ pub(crate) const FSHARP_GENUINE_CLONE: &str = "module ParseHelpers\n\n\
     \x20           total <- total - 1\n\
     \x20   total\n";
 
+/// A genuine OCaml copy: an accumulator with a guarded loop body.
+pub(crate) const OCAML_GENUINE_CLONE: &str = "let accumulate values floor =\n\
+    \x20 let total = ref 0 in\n\
+    \x20 List.iter\n\
+    \x20   (fun value ->\n\
+    \x20     if value > floor then total := !total + (value * 2)\n\
+    \x20     else total := !total - 1)\n\
+    \x20   values;\n\
+    \x20 !total\n";
+
 /// One F# module holding a numeric array literal. Same length (same
 /// shape) across modules, entirely different values — the #336
 /// false-positive family.

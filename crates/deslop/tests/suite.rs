@@ -105,12 +105,12 @@ mod fsharp_issue_336_data_table_category;
 mod fsharp_issue_339_sibling_window_rename;
 #[path = "fsharp_issue_339_token_fallback_rename.rs"]
 mod fsharp_issue_339_token_fallback_rename;
-#[path = "fsharp_scaffolding.rs"]
-mod fsharp_scaffolding;
 #[path = "generated_banner.rs"]
 mod generated_banner;
 #[path = "go_vendor_exclusion.rs"]
 mod go_vendor_exclusion;
+#[path = "import_scaffolding.rs"]
+mod import_scaffolding;
 #[path = "incremental_equivalence.rs"]
 mod incremental_equivalence;
 #[path = "incremental_multilang_golden.rs"]
@@ -178,12 +178,16 @@ mod metrics_folder_rollup;
 mod metrics_weighted_wire_refusal;
 #[path = "minified_artifact_exclusion.rs"]
 mod minified_artifact_exclusion;
+#[path = "ocaml_literal_bindings.rs"]
+mod ocaml_literal_bindings;
 #[path = "ollama_failures.rs"]
 mod ollama_failures;
 #[path = "operator_drift_fsharp.rs"]
 mod operator_drift_fsharp;
 #[path = "operator_drift_is_not_duplication.rs"]
 mod operator_drift_is_not_duplication;
+#[path = "operator_drift_ocaml.rs"]
+mod operator_drift_ocaml;
 #[path = "pair_consistent_signals.rs"]
 mod pair_consistent_signals;
 #[path = "pair_size_coherence.rs"]

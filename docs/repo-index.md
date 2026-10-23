@@ -33,7 +33,7 @@ Reference material for agents. Read it when you need to locate something — it 
 - **Fingerprinting** operates on AST subtrees, not lines. Minimum node count is configurable.
 - **Ranking** weights clone size × clone count × spanned LOC, worst offenders first.
 
-Languages: C#, Rust, Python, Dart, JavaScript, TypeScript/TSX, PHP, F#, Go. Detection and ranking ship today; dedup actions are roadmap.
+Languages: C#, Rust, Python, Dart, JavaScript, TypeScript/TSX, PHP, F#, Go, OCaml. Detection and ranking ship today; dedup actions are roadmap.
 
 ## Migration to `lspkit`
 

@@ -714,6 +714,7 @@ suite("tree menu renderers", () => {
       ["main.go", "go"],
       ["Model.php", "php"],
       ["Tests.fs", "fsharp"],
+      ["parser.ml", "ocaml"],
       ["Widget.dart", "dart"],
       ["App.tsx", "tsx"],
       ["notes.txt", ""],

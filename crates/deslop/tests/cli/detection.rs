@@ -59,6 +59,14 @@ fn detects_type2_clone_in_fsharp_fixture() -> Result<()> {
     Ok(())
 }
 
+// [PARSE-OCAML-NORMALIZE] OCaml Type-2 fixture: the same accumulator with every name and constant changed; the report cluster is mass-only.
+#[test]
+fn detects_type2_clone_in_ocaml_fixture() -> Result<()> {
+    let json = run_min_nodes("ocaml-small", "10")?;
+    assert_type2_report(&json, "alpha.ml", "beta.ml")?;
+    Ok(())
+}
+
 // [PIPELINE-LANG-TRAIT] Go Type-2 fixture: the report cluster is mass-only; any pair measurements require explicit endpoints.
 #[test]
 fn detects_type2_clone_in_go_fixture() -> Result<()> {
@@ -129,6 +137,22 @@ fn require_occurrence_text(scan_root: &Path, occurrence: &serde_json::Value) -> 
 /// than asserting none does: it fails both if the pair regresses to a
 /// fragment view (nobody carries it) and if the fixture ever stops
 /// being a near-miss at all (both carry it, i.e. an exact copy).
+// Implements [FUSED-SIGNALS-THREE-LAYER] for OCaml ([PARSE-OCAML-NORMALIZE]):
+// a genuine Type-3 near-miss, mirroring the F# fixture. `delta.ml`'s loop
+// body runs two accumulator updates per iteration; `epsilon.ml`'s runs
+// one. The shared guarded-accumulator structure surfaces as a cross-file
+// cluster, and the reported view is the near-miss itself, never a
+// byte-identical pair.
+#[test]
+fn detects_type3_clone_in_ocaml_fixture() -> Result<()> {
+    let json = run_min_nodes("ocaml-type3", "8")?;
+    let scan_root = fixture("ocaml-type3");
+    let clusters = report_clusters(&json)?;
+    let cluster = require_cluster_spanning(&clusters, "delta.ml", "epsilon.ml")?;
+    assert_type3_signals(&scan_root, cluster, "OCaml")?;
+    Ok(())
+}
+
 fn assert_enclosing_near_miss(
     scan_root: &Path,
     cluster: &serde_json::Value,
@@ -307,6 +331,18 @@ fn go_package_and_import_prologue_never_becomes_a_cross_file_cluster() -> Result
 fn dissimilar_fsharp_functions_across_files_stay_in_separate_clusters() -> Result<()> {
     let json = run_min_nodes("fsharp-dissimilar-functions", "8")?;
     assert_every_cluster_single_file(&json, "F#")
+}
+
+// Audience: HUMAN. Zero-false-positive guard for OCaml
+// ([PARSE-OCAML-NORMALIZE]). `tally` counts words into a hash table
+// through a closure; `describe` is an `if`/`else if` cascade of string
+// results. The two share no real shape, so a human reading the report
+// must never see them paired as duplicates. Positive bound: every
+// cluster's occurrences come from a single file.
+#[test]
+fn dissimilar_ocaml_functions_across_files_stay_in_separate_clusters() -> Result<()> {
+    let json = run_min_nodes("ocaml-dissimilar-functions", "8")?;
+    assert_every_cluster_single_file(&json, "OCaml")
 }
 
 // Audience: HUMAN. Zero-false-positive guard for Go ([LANG-CAND-GO]).
